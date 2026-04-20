@@ -1,0 +1,2624 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+    <meta name="theme-color" content="#f2f2f7">
+    <meta name="mobile-web-app-capable" content="yes">
+    <meta name="apple-mobile-web-app-capable" content="yes">
+    <meta name="apple-mobile-web-app-status-bar-style" content="default">
+    <title>Abudata POS - Premium Mobile</title>
+    <style>
+        :root {
+            --primary: #007aff;
+            --primary-dark: #005ecb;
+            --primary-soft: #eaf3ff;
+            --bg-body: #f2f2f7;
+            --surface: #ffffff;
+            --surface-elevated: rgba(255, 255, 255, 0.78);
+            --text-dark: #111827;
+            --text-light: #6b7280;
+            --success: #34c759;
+            --danger: #ff3b30;
+            --border: #d1d1d6;
+            --glass-border: rgba(255, 255, 255, 0.75);
+            --radius-lg: 22px;
+            --radius-md: 16px;
+            --radius-sm: 12px;
+            --shadow-soft: 0 14px 32px -24px rgba(15, 23, 42, 0.45);
+            --safe-top: env(safe-area-inset-top, 0px);
+            --header-height: calc(60px + var(--safe-top));
+            --bottom-area-height: 108px;
+            --app-shell-max-width: 1080px;
+            --mobile-font-scale: 1;
+        }
+
+        * {
+            box-sizing: border-box;
+            margin: 0;
+            padding: 0;
+            -webkit-tap-highlight-color: transparent;
+        }
+
+        html,
+        body {
+            width: 100%;
+        }
+
+        html {
+            font-size: calc(16px * var(--mobile-font-scale));
+            -webkit-text-size-adjust: 100%;
+            text-size-adjust: 100%;
+        }
+
+        body {
+            min-height: 100vh;
+            min-height: 100dvh;
+            background: radial-gradient(circle at 15% 0%, #ffffff 0%, #f5f7fc 48%, #edf1f8 100%);
+            color: var(--text-dark);
+            font-family: 'SF Pro Text', 'SF Pro Display', -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
+            overflow-x: hidden;
+            padding-bottom: calc(var(--bottom-area-height) + env(safe-area-inset-bottom));
+        }
+
+        button,
+        input {
+            font: inherit;
+        }
+
+        .app-shell {
+            max-width: var(--app-shell-max-width);
+            margin: 0 auto;
+        }
+
+        .app-header {
+            position: sticky;
+            top: 0;
+            z-index: 40;
+            background: var(--surface-elevated);
+            backdrop-filter: saturate(175%) blur(18px);
+            -webkit-backdrop-filter: saturate(175%) blur(18px);
+            border-bottom: 1px solid rgba(182, 188, 200, 0.45);
+            box-shadow: inset 0 -1px 0 var(--glass-border);
+            padding: calc(var(--safe-top) + 0.5rem) 1rem 0.48rem;
+        }
+
+        .app-title {
+            color: var(--text-dark);
+            font-size: clamp(1rem, 2.7vw, 1.15rem);
+            line-height: 1.2;
+            letter-spacing: -0.025em;
+            font-weight: 700;
+            text-align: center;
+            margin: 0 auto;
+        }
+
+        .category-scroll {
+            position: sticky;
+            top: var(--header-height);
+            z-index: 35;
+            display: flex;
+            gap: 0.48rem;
+            padding: 0.56rem 1rem 0.82rem;
+            margin-bottom: 0.42rem;
+            overflow-x: auto;
+            scrollbar-width: none;
+            background: rgba(246, 248, 253, 0.98);
+            border-bottom: 1px solid rgba(199, 208, 221, 0.72);
+            backdrop-filter: none;
+            -webkit-backdrop-filter: none;
+        }
+
+        .category-scroll::-webkit-scrollbar {
+            display: none;
+        }
+
+        .pill {
+            border: 1px solid rgba(60, 60, 67, 0.2);
+            background: rgba(255, 255, 255, 0.84);
+            color: var(--text-light);
+            border-radius: 999px;
+            padding: 0.5rem 0.84rem;
+            font-size: 0.8rem;
+            line-height: 1;
+            font-weight: 600;
+            display: inline-flex;
+            align-items: center;
+            gap: 0.4rem;
+            flex: 0 0 auto;
+            cursor: pointer;
+            box-shadow: none;
+            transition: 0.18s ease;
+        }
+
+        .pill svg {
+            width: 1em;
+            height: 1em;
+            stroke-width: 2.1;
+            display: block;
+            flex: 0 0 auto;
+        }
+
+        .pill.active {
+            border-color: transparent;
+            background: var(--primary);
+            color: var(--surface);
+            box-shadow: 0 7px 14px -12px rgba(0, 122, 255, 0.55);
+        }
+
+        .main-content {
+            padding: 0.5rem 1rem 1rem;
+        }
+
+        .ticket-list {
+            display: grid;
+            grid-template-columns: 1fr;
+            gap: 0.75rem;
+            margin-top: 0;
+        }
+
+        .ticket-card {
+            background: var(--surface);
+            display: flex;
+            border: 1px solid rgba(171, 184, 204, 0.26);
+            border-radius: 17px;
+            overflow: hidden;
+            box-shadow: var(--shadow-soft);
+            cursor: pointer;
+            position: relative;
+            transition: transform 0.16s ease, box-shadow 0.16s ease, border-color 0.16s ease;
+        }
+
+        .ticket-card:active {
+            transform: scale(0.994);
+            box-shadow: 0 10px 24px -22px rgba(15, 23, 42, 0.9);
+            border-color: rgba(113, 125, 146, 0.28);
+        }
+
+        .ticket-main {
+            padding: 0.84rem 0.82rem 0.84rem 0.92rem;
+            flex-grow: 1;
+            display: flex;
+            flex-direction: column;
+            gap: 0.3rem;
+            min-width: 0;
+        }
+
+        .ticket-divider {
+            position: relative;
+            width: 16px;
+            flex: 0 0 16px;
+            display: flex;
+            justify-content: center;
+        }
+
+        .ticket-divider-line {
+            width: 1px;
+            height: calc(100% - 18px);
+            margin: 9px 0;
+            background-image: repeating-linear-gradient(
+                to bottom,
+                #d2d9e5 0 4px,
+                transparent 4px 8px
+            );
+        }
+
+        .ticket-divider::before,
+        .ticket-divider::after {
+            content: '';
+            position: absolute;
+            left: 50%;
+            width: 14px;
+            height: 14px;
+            border-radius: 50%;
+            transform: translateX(-50%);
+            background: var(--bg-body);
+            border: 1px solid #dbe3ef;
+            box-shadow: inset 0 0 0 1px rgba(255, 255, 255, 0.35);
+        }
+
+        .ticket-divider::before {
+            top: -7px;
+        }
+
+        .ticket-divider::after {
+            bottom: -7px;
+        }
+
+        .ticket-meta {
+            width: max-content;
+            display: inline-flex;
+            align-items: center;
+            gap: 0.3rem;
+            padding: 0.21rem 0.5rem;
+            border-radius: 999px;
+            font-size: 0.62rem;
+            line-height: 1;
+            font-weight: 600;
+            text-transform: none;
+            letter-spacing: 0.01em;
+            background: #eaf3ff;
+            color: #0a63ca;
+        }
+
+        .ticket-meta.wisata {
+            background: #fff3dc;
+            color: #9a5b00;
+        }
+
+        .ticket-meta.kendaraan {
+            background: #e6f8f0;
+            color: #0f8f60;
+        }
+
+        .ticket-meta svg {
+            width: 0.95em;
+            height: 0.95em;
+            display: block;
+            flex: 0 0 auto;
+        }
+
+        .ticket-main h3 {
+            font-size: 0.93rem;
+            line-height: 1.28;
+            letter-spacing: -0.015em;
+            font-weight: 650;
+            display: -webkit-box;
+            -webkit-line-clamp: 2;
+            -webkit-box-orient: vertical;
+            overflow: hidden;
+        }
+
+        .ticket-main p {
+            font-size: 0.74rem;
+            color: var(--text-light);
+            line-height: 1.34;
+            display: -webkit-box;
+            -webkit-line-clamp: 2;
+            -webkit-box-orient: vertical;
+            overflow: hidden;
+        }
+
+        .ticket-side {
+            width: clamp(86px, 26vw, 110px);
+            padding: 0.72rem 0.6rem 0.72rem 0.42rem;
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
+            align-items: flex-end;
+            gap: 0.1rem;
+            background: linear-gradient(160deg, #f5f9ff, #ffffff 68%);
+        }
+
+        .price-label {
+            font-size: 0.58rem;
+            color: #8893a9;
+            letter-spacing: 0.04em;
+            font-weight: 600;
+            text-transform: uppercase;
+        }
+
+        .price-tag {
+            margin-top: 0.04rem;
+            display: inline-flex;
+            align-items: flex-end;
+            justify-content: flex-end;
+            gap: 0.14rem;
+            white-space: nowrap;
+            line-height: 1;
+            font-variant-numeric: tabular-nums;
+        }
+
+        .price-currency {
+            font-size: 0.62rem;
+            font-weight: 600;
+            color: var(--primary);
+            transform: translateY(-1px);
+        }
+
+        .price-value {
+            font-weight: 700;
+            color: #0a5ec0;
+            font-size: 0.96rem;
+            letter-spacing: -0.02em;
+        }
+
+        .price-tag.is-long .price-value {
+            font-size: 0.8rem;
+            letter-spacing: -0.03em;
+        }
+
+        .empty-state {
+            border: 1px dashed var(--border);
+            border-radius: var(--radius-md);
+            padding: 1rem;
+            text-align: center;
+            color: var(--text-light);
+            background: rgba(255, 255, 255, 0.87);
+            font-size: 0.85rem;
+            font-weight: 500;
+        }
+
+        .bottom-action {
+            position: fixed;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            z-index: 100;
+            padding: 0.56rem 0.8rem calc(0.64rem + env(safe-area-inset-bottom));
+        }
+
+        .bottom-action-inner {
+            margin: 0 auto;
+            max-width: 1080px;
+            background: rgba(255, 255, 255, 0.74);
+            border: 1px solid rgba(176, 187, 204, 0.5);
+            border-radius: 24px;
+            box-shadow: 0 20px 40px -32px rgba(15, 23, 42, 0.8);
+            backdrop-filter: saturate(180%) blur(16px);
+            -webkit-backdrop-filter: saturate(180%) blur(16px);
+            padding: 0.58rem;
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            gap: 0.55rem;
+        }
+
+        .cart-trigger {
+            display: flex;
+            align-items: center;
+            gap: 0.65rem;
+            min-width: 0;
+        }
+
+        .badge-icon {
+            position: relative;
+            background: var(--primary-soft);
+            padding: 0.58rem;
+            border-radius: 0.85rem;
+            color: var(--primary-dark);
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            box-shadow: inset 0 0 0 1px rgba(0, 122, 255, 0.12);
+        }
+
+        .badge-icon svg {
+            width: 1.25rem;
+            height: 1.25rem;
+            display: block;
+            flex: 0 0 auto;
+        }
+
+        .badge-count {
+            position: absolute;
+            top: -5px;
+            right: -5px;
+            background: var(--primary);
+            color: var(--surface);
+            font-size: 0.63rem;
+            font-weight: 800;
+            line-height: 1;
+            padding: 0.22rem 0.36rem;
+            border-radius: 999px;
+            border: 2px solid var(--surface);
+            min-width: 1.15rem;
+            text-align: center;
+            box-shadow: 0 4px 8px -6px rgba(0, 122, 255, 0.7);
+        }
+
+        .cart-label {
+            font-size: 0.68rem;
+            color: var(--text-light);
+            font-weight: 500;
+            letter-spacing: 0;
+        }
+
+        .cart-total {
+            font-weight: 700;
+            font-size: 0.93rem;
+            margin-top: 0.05rem;
+            white-space: nowrap;
+            letter-spacing: -0.012em;
+        }
+
+        .btn-checkout {
+            border: none;
+            border-radius: 14px;
+            padding: 0.75rem 1.02rem;
+            min-width: 124px;
+            background: linear-gradient(180deg, #1a8cff, var(--primary));
+            color: var(--surface);
+            font-size: 0.89rem;
+            font-weight: 700;
+            letter-spacing: -0.01em;
+            box-shadow: 0 12px 20px -16px rgba(0, 122, 255, 0.8);
+            cursor: pointer;
+            transition: 0.18s ease;
+        }
+
+        .btn-checkout:disabled {
+            opacity: 0.55;
+            cursor: not-allowed;
+            box-shadow: none;
+            background: #b9c7da;
+        }
+
+        .btn-checkout:not(:disabled):active {
+            transform: scale(0.985);
+        }
+
+        .modal {
+            position: fixed;
+            inset: 0;
+            background: rgba(17, 25, 40, 0.42);
+            display: none;
+            z-index: 1000;
+            align-items: flex-end;
+            justify-content: center;
+            backdrop-filter: blur(2px);
+            -webkit-backdrop-filter: blur(2px);
+        }
+
+        .modal.active {
+            display: flex;
+        }
+
+        .modal-body {
+            background: rgba(248, 250, 255, 0.95);
+            width: min(100%, 560px);
+            border-radius: 24px 24px 0 0;
+            border: 1px solid rgba(188, 197, 214, 0.35);
+            border-bottom: none;
+            padding: 1.38rem 1rem 1rem;
+            max-height: 92vh;
+            overflow-y: auto;
+            animation: slide-up 0.26s ease;
+        }
+
+        .modal-body::before {
+            content: '';
+            display: block;
+            width: 40px;
+            height: 5px;
+            margin: -0.55rem auto 0.82rem;
+            border-radius: 999px;
+            background: rgba(120, 130, 148, 0.34);
+        }
+
+        .modal-center {
+            align-items: center;
+            padding: 0.9rem;
+        }
+
+        .modal-center .receipt-modal-card {
+            width: min(100%, 390px);
+            background: rgba(248, 250, 255, 0.96);
+            border: 1px solid rgba(188, 197, 214, 0.35);
+            border-radius: 18px;
+            padding: 1rem;
+            animation: fade-up 0.22s ease;
+            box-shadow: 0 18px 38px -26px rgba(15, 23, 42, 0.88);
+        }
+
+        @keyframes slide-up {
+            from {
+                transform: translateY(18px);
+                opacity: 0;
+            }
+
+            to {
+                transform: translateY(0);
+                opacity: 1;
+            }
+        }
+
+        @keyframes fade-up {
+            from {
+                transform: translateY(12px) scale(0.99);
+                opacity: 0;
+            }
+
+            to {
+                transform: translateY(0) scale(1);
+                opacity: 1;
+            }
+        }
+
+        .payment-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: flex-start;
+            gap: 0.8rem;
+            margin-bottom: 1rem;
+        }
+
+        .payment-header h3 {
+            font-weight: 700;
+            font-size: 1.08rem;
+            line-height: 1.25;
+            letter-spacing: -0.02em;
+        }
+
+        .payment-header p {
+            margin-top: 0.2rem;
+            color: var(--text-light);
+            font-size: 0.79rem;
+            font-weight: 450;
+        }
+
+        .btn-icon {
+            border: 1px solid var(--border);
+            background: rgba(240, 244, 251, 0.85);
+            width: 36px;
+            height: 36px;
+            border-radius: 999px;
+            font-size: 1.3rem;
+            line-height: 1;
+            color: #6d7688;
+            cursor: pointer;
+            transition: 0.16s ease;
+        }
+
+        .btn-icon:active {
+            transform: scale(0.96);
+        }
+
+        .payment-summary {
+            border: 1px solid #d9e8ff;
+            background: linear-gradient(160deg, #f4f8ff, #ffffff);
+            border-radius: 16px;
+            padding: 0.8rem;
+            text-align: center;
+            margin-bottom: 1rem;
+        }
+
+        .payment-summary p {
+            font-size: 0.75rem;
+            letter-spacing: 0.01em;
+            font-weight: 600;
+            color: #426290;
+            text-transform: none;
+        }
+
+        .payment-summary h2 {
+            margin-top: 0.2rem;
+            font-size: 1.74rem;
+            color: #0457b8;
+            font-weight: 720;
+            letter-spacing: -0.02em;
+        }
+
+        .form-group {
+            margin-bottom: 1rem;
+        }
+
+        .form-group label {
+            display: block;
+            font-size: 0.76rem;
+            font-weight: 600;
+            color: var(--text-light);
+            margin-bottom: 0.45rem;
+            text-transform: none;
+            letter-spacing: 0;
+        }
+
+        .input-box {
+            width: 100%;
+            border: 1.5px solid #d2d7e2;
+            background: #f4f6fb;
+            border-radius: 14px;
+            padding: 0.75rem 0.85rem;
+            text-align: right;
+            font-size: 1.15rem;
+            font-weight: 650;
+            outline: none;
+            transition: 0.16s ease;
+        }
+
+        .input-box:focus {
+            border-color: #84bdff;
+            background: #ffffff;
+            box-shadow: 0 0 0 4px rgba(0, 122, 255, 0.12);
+        }
+
+        .shortcut-label {
+            font-size: 0.76rem;
+            font-weight: 600;
+            color: var(--text-light);
+            margin-bottom: 0.46rem;
+            text-transform: none;
+            letter-spacing: 0;
+        }
+
+        .shortcuts {
+            display: grid;
+            grid-template-columns: repeat(3, minmax(0, 1fr));
+            gap: 0.45rem;
+            margin-bottom: 1rem;
+        }
+
+        .btn-shortcut {
+            border: 1px solid #d4dae6;
+            background: #f6f8fc;
+            color: #445068;
+            border-radius: 12px;
+            padding: 0.58rem 0.4rem;
+            font-size: 0.73rem;
+            font-weight: 600;
+            cursor: pointer;
+            transition: 0.16s ease;
+        }
+
+        .btn-shortcut:active {
+            background: #ecf1fa;
+            transform: scale(0.985);
+        }
+
+        .kembalian-box {
+            border: 1px solid #c8f0d7;
+            background: #eefbf3;
+            border-radius: 14px;
+            padding: 0.72rem 0.8rem;
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            margin-bottom: 1rem;
+        }
+
+        .kembalian-label {
+            color: #1f8f5d;
+            font-size: 0.82rem;
+            font-weight: 600;
+        }
+
+        .kembalian-value {
+            color: var(--success);
+            font-size: 1rem;
+            font-weight: 700;
+        }
+
+        .btn-confirm {
+            width: 100%;
+            border: none;
+            border-radius: 14px;
+            padding: 0.85rem;
+            background: linear-gradient(180deg, #1a8cff, var(--primary));
+            color: var(--surface);
+            font-size: 0.93rem;
+            font-weight: 700;
+            letter-spacing: -0.01em;
+            box-shadow: 0 12px 20px -16px rgba(0, 122, 255, 0.85);
+            cursor: pointer;
+            transition: 0.16s ease;
+        }
+
+        .btn-confirm:active {
+            transform: scale(0.99);
+        }
+
+        .receipt-container {
+            padding: 0.2rem 0;
+        }
+
+        .receipt-paper {
+            border: 1px solid #dbe3ef;
+            border-radius: 12px;
+            background: #ffffff;
+            padding: 0.92rem;
+            color: #111827;
+            font-family: 'SF Mono', 'SFMono-Regular', ui-monospace, 'Cascadia Mono', 'Consolas', monospace;
+        }
+
+        .receipt-head {
+            text-align: center;
+            margin-bottom: 0.85rem;
+        }
+
+        .receipt-head h3 {
+            font-size: 0.96rem;
+            font-weight: 700;
+            letter-spacing: 0.04em;
+        }
+
+        .receipt-head p {
+            margin-top: 0.24rem;
+            font-size: 0.66rem;
+            color: #475569;
+        }
+
+        .receipt-meta {
+            border: 1px dashed #cbd5e1;
+            border-radius: 8px;
+            padding: 0.56rem;
+            margin-bottom: 0.72rem;
+            background: #f8fafc;
+            display: grid;
+            gap: 0.26rem;
+        }
+
+        .receipt-meta-line {
+            display: flex;
+            justify-content: space-between;
+            gap: 0.7rem;
+            font-size: 0.65rem;
+        }
+
+        .receipt-meta-line span {
+            color: #64748b;
+        }
+
+        .receipt-meta-line strong {
+            color: #0f172a;
+            font-weight: 700;
+            text-align: right;
+        }
+
+        .receipt-table {
+            width: 100%;
+            border-collapse: collapse;
+            font-size: 0.69rem;
+        }
+
+        .receipt-table th,
+        .receipt-table td {
+            padding: 0.36rem 0;
+            border-bottom: 1px dashed #dbe3ef;
+            vertical-align: top;
+        }
+
+        .receipt-table th {
+            color: #64748b;
+            text-transform: uppercase;
+            font-size: 0.62rem;
+            letter-spacing: 0.04em;
+            font-weight: 700;
+        }
+
+        .receipt-table th:last-child,
+        .receipt-table td:last-child {
+            text-align: right;
+        }
+
+        .receipt-item-name {
+            display: block;
+            font-weight: 700;
+            color: #0f172a;
+            line-height: 1.28;
+        }
+
+        .receipt-item-qty {
+            display: block;
+            margin-top: 0.16rem;
+            font-size: 0.61rem;
+            color: #64748b;
+        }
+
+        .receipt-summary {
+            margin-top: 0.62rem;
+            display: grid;
+            gap: 0.26rem;
+            font-size: 0.69rem;
+        }
+
+        .receipt-summary-line {
+            display: flex;
+            justify-content: space-between;
+            gap: 0.7rem;
+        }
+
+        .receipt-summary-line strong {
+            font-weight: 700;
+        }
+
+        .receipt-summary-line.total {
+            margin-top: 0.28rem;
+            padding-top: 0.4rem;
+            border-top: 1px solid #dbe3ef;
+            font-size: 0.76rem;
+            font-weight: 700;
+        }
+
+        .receipt-summary-line.change strong {
+            color: var(--success);
+        }
+
+        .receipt-footer {
+            margin-top: 0.75rem;
+            text-align: center;
+            font-size: 0.62rem;
+            color: #64748b;
+        }
+
+        .receipt-actions {
+            margin-top: 0.95rem;
+            display: grid;
+            gap: 0.58rem;
+        }
+
+        .btn-print-receipt {
+            width: 100%;
+            border: 1px solid #cdd7e6;
+            border-radius: 14px;
+            padding: 0.78rem 0.9rem;
+            background: #ffffff;
+            color: #2563eb;
+            font-size: 0.88rem;
+            font-weight: 700;
+            letter-spacing: -0.01em;
+            cursor: pointer;
+            transition: 0.16s ease;
+        }
+
+        .btn-print-receipt:active {
+            transform: scale(0.99);
+        }
+
+        .btn-print-receipt:disabled {
+            opacity: 0.55;
+            cursor: not-allowed;
+        }
+
+        .btn-connect-printer {
+            width: 100%;
+            border: 1px solid #cdd7e6;
+            border-radius: 14px;
+            padding: 0.74rem 0.9rem;
+            background: #f8fafc;
+            color: #1f2937;
+            font-size: 0.83rem;
+            font-weight: 700;
+            letter-spacing: -0.01em;
+            cursor: pointer;
+            transition: 0.16s ease;
+        }
+
+        .btn-connect-printer:active {
+            transform: scale(0.99);
+        }
+
+        .btn-connect-printer:disabled {
+            opacity: 0.55;
+            cursor: not-allowed;
+        }
+
+        @media (min-width: 640px) {
+            :root {
+                --header-height: calc(62px + var(--safe-top));
+                --bottom-area-height: 120px;
+            }
+
+            .app-header {
+                padding: calc(var(--safe-top) + 0.54rem) 1.15rem 0.54rem;
+            }
+
+            .category-scroll,
+            .main-content {
+                padding-left: 1.15rem;
+                padding-right: 1.15rem;
+            }
+
+            .ticket-list {
+                grid-template-columns: repeat(2, minmax(0, 1fr));
+                gap: 0.85rem;
+            }
+
+            .ticket-main {
+                padding: 0.82rem 0.84rem 0.85rem 0.9rem;
+            }
+
+            .ticket-divider {
+                width: 17px;
+                flex-basis: 17px;
+            }
+
+            .ticket-side {
+                width: clamp(92px, 22vw, 112px);
+            }
+
+            .bottom-action {
+                padding-left: 1.2rem;
+                padding-right: 1.2rem;
+            }
+
+            .btn-checkout {
+                min-width: 140px;
+            }
+
+            .modal-body {
+                border-radius: 26px 26px 0 0;
+                padding: 1.35rem;
+            }
+
+            .shortcuts {
+                gap: 0.55rem;
+            }
+        }
+
+        @media (min-width: 920px) {
+            :root {
+                --header-height: calc(64px + var(--safe-top));
+                --bottom-area-height: 132px;
+            }
+
+            .app-header {
+                padding: calc(var(--safe-top) + 0.56rem) 1.25rem 0.56rem;
+            }
+
+            .category-scroll,
+            .main-content {
+                padding-left: 1.25rem;
+                padding-right: 1.25rem;
+            }
+
+            .ticket-list {
+                grid-template-columns: repeat(3, minmax(0, 1fr));
+            }
+
+            .ticket-main {
+                padding: 0.88rem 0.9rem 0.9rem 0.96rem;
+                gap: 0.3rem;
+            }
+
+            .ticket-main h3 {
+                font-size: 0.94rem;
+            }
+
+            .ticket-main p {
+                font-size: 0.74rem;
+            }
+
+            .bottom-action-inner {
+                padding: 0.7rem;
+            }
+
+            .modal {
+                align-items: center;
+                padding: 1.2rem;
+            }
+
+            .modal-body {
+                border-radius: 20px;
+                max-height: min(86vh, 700px);
+            }
+        }
+
+        body.mobile-view {
+            --app-shell-max-width: 480px;
+        }
+
+        body.mobile-view.mobile-desktop-viewport {
+            --app-shell-max-width: calc(100vw - 1.72rem);
+        }
+
+        body.mobile-view .app-header,
+        body.mobile-view .category-scroll,
+        body.mobile-view .main-content {
+            padding-left: 0.86rem;
+            padding-right: 0.86rem;
+        }
+
+        body.mobile-view .ticket-list {
+            grid-template-columns: 1fr;
+            gap: 0.72rem;
+        }
+
+        body.mobile-view .main-content {
+            padding-top: 0.88rem;
+        }
+
+        body.mobile-view .ticket-main h3 {
+            font-size: 0.95rem;
+        }
+
+        body.mobile-view .ticket-main p {
+            font-size: 0.75rem;
+        }
+
+        body.mobile-view .ticket-side {
+            width: clamp(96px, 30vw, 124px);
+        }
+
+        body.mobile-view .bottom-action {
+            padding-left: 0.86rem;
+            padding-right: 0.86rem;
+        }
+
+        body.mobile-view .bottom-action-inner {
+            max-width: var(--app-shell-max-width);
+        }
+
+        body.mobile-view .btn-checkout {
+            min-width: 110px;
+            padding-left: 0.9rem;
+            padding-right: 0.9rem;
+        }
+    </style>
+</head>
+<body>
+    <div class="app-shell">
+        <header class="app-header">
+            <h1 class="app-title">MyTIX POS</h1>
+        </header>
+
+        <section class="category-scroll" id="category-pills" aria-label="Kategori produk">
+            <button type="button" class="pill active" onclick="filterCategory('all', this)">
+                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round">
+                    <rect x="4" y="4" width="6" height="6" rx="1"></rect>
+                    <rect x="14" y="4" width="6" height="6" rx="1"></rect>
+                    <rect x="4" y="14" width="6" height="6" rx="1"></rect>
+                    <rect x="14" y="14" width="6" height="6" rx="1"></rect>
+                </svg>
+                <span>Semua</span>
+            </button>
+            <button type="button" class="pill" onclick="filterCategory('wisata', this)">
+                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round">
+                    <path d="M12 21s7-4.4 7-10a7 7 0 1 0-14 0c0 5.6 7 10 7 10z"></path>
+                    <circle cx="12" cy="11" r="2.5"></circle>
+                </svg>
+                <span>Wisata</span>
+            </button>
+            <button type="button" class="pill" onclick="filterCategory('kendaraan', this)">
+                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round">
+                    <rect x="4" y="4" width="16" height="12" rx="2"></rect>
+                    <path d="M7 16v3"></path>
+                    <path d="M17 16v3"></path>
+                    <circle cx="8" cy="17.5" r="1"></circle>
+                    <circle cx="16" cy="17.5" r="1"></circle>
+                </svg>
+                <span>Kendaraan</span>
+            </button>
+        </section>
+
+        <main class="main-content">
+            <div class="ticket-list" id="ticket-grid"></div>
+        </main>
+    </div>
+
+    <div class="bottom-action">
+        <div class="bottom-action-inner">
+            <div class="cart-trigger" id="cart-info">
+                <div class="badge-icon" aria-hidden="true">
+                    <svg viewBox="0 0 24 24" width="21" height="21" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                        <circle cx="9" cy="20" r="1"></circle>
+                        <circle cx="18" cy="20" r="1"></circle>
+                        <path d="M2 3h3l2.4 11.5a2 2 0 0 0 2 1.6h7.8a2 2 0 0 0 2-1.6L21 6.5H6.1"></path>
+                    </svg>
+                    <span class="badge-count" id="cart-count">0</span>
+                </div>
+                <div>
+                    <p class="cart-label">Total Belanja</p>
+                    <p id="bottom-total-text" class="cart-total">Rp 0</p>
+                </div>
+            </div>
+            <button id="checkout-button" type="button" class="btn-checkout" onclick="openCheckout()" disabled>Checkout</button>
+        </div>
+    </div>
+
+    <div id="payment-modal" class="modal" aria-hidden="true">
+        <div class="modal-body" role="dialog" aria-modal="true" aria-labelledby="payment-title">
+            <div class="payment-header">
+                <div>
+                    <h3 id="payment-title">Selesaikan Pembayaran</h3>
+                    <p>Isi nominal bayar lalu konfirmasi transaksi.</p>
+                </div>
+                <button type="button" class="btn-icon" onclick="closeModal()" aria-label="Tutup modal">&times;</button>
+            </div>
+
+            <div class="payment-summary">
+                <p>Total Tagihan</p>
+                <h2 id="modal-grand-total">Rp 0</h2>
+            </div>
+
+            <div class="form-group">
+                <label for="cash-input">Nominal Bayar (Rp)</label>
+                <input type="number" id="cash-input" class="input-box" placeholder="0" inputmode="numeric" min="0" oninput="calculateChange()">
+            </div>
+
+            <p class="shortcut-label">Shortcut Pembayaran</p>
+            <div class="shortcuts">
+                <button type="button" class="btn-shortcut" onclick="setCash('pas')">Uang Pas</button>
+                <button type="button" class="btn-shortcut" onclick="roundTotal()">Bulatkan</button>
+                <button type="button" class="btn-shortcut" onclick="addCash(10000)">+10rb</button>
+                <button type="button" class="btn-shortcut" onclick="addCash(50000)">+50rb</button>
+                <button type="button" class="btn-shortcut" onclick="addCash(100000)">+100rb</button>
+                <button type="button" class="btn-shortcut" onclick="clearCash()">Reset</button>
+            </div>
+
+            <div class="kembalian-box">
+                <span class="kembalian-label">Kembalian</span>
+                <span id="change-text" class="kembalian-value">Rp 0</span>
+            </div>
+
+            <button id="confirm-payment-button" type="button" class="btn-confirm" onclick="processPayment()">Konfirmasi Pembayaran</button>
+        </div>
+    </div>
+
+    <div id="receipt-modal" class="modal modal-center" aria-hidden="true">
+        <div class="receipt-modal-card" role="dialog" aria-modal="true" aria-labelledby="receipt-title">
+            <div class="receipt-container" id="receipt-content"></div>
+            <div class="receipt-actions">
+                <button type="button" class="btn-confirm" onclick="startNewTransaction()">Transaksi Baru</button>
+                <button id="connect-printer-button" type="button" class="btn-connect-printer" onclick="connectPrinterManually()">Hubungkan Printer Bluetooth</button>
+                <button id="print-receipt-button" type="button" class="btn-print-receipt" onclick="printReceipt()" disabled>Cetak Struk (Bluetooth)</button>
+            </div>
+        </div>
+    </div>
+
+    <script src="https://cdn.jsdelivr.net/npm/@point-of-sale/receipt-printer-encoder@3.0.3/dist/receipt-printer-encoder.umd.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/@point-of-sale/webbluetooth-receipt-printer@2.0.0/dist/webbluetooth-receipt-printer.umd.js"></script>
+
+    <script>
+        const fallbackProducts = [
+            { id: 'w1', category: 'wisata', name: 'Tiket Terusan Dufan', price: 275000, desc: 'Akses penuh ke semua wahana.' },
+            { id: 'w2', category: 'wisata', name: 'Tiket Ragunan', price: 15000, desc: 'Tiket masuk dewasa.' },
+            { id: 'w3', category: 'wisata', name: 'Tiket Candi Borobudur', price: 50000, desc: 'Tiket domestik area pelataran.' },
+            { id: 'k1', category: 'kendaraan', name: 'Tiket Bus Trans', price: 3500, desc: 'Tarif flat satu kali jalan.' },
+            { id: 'k2', category: 'kendaraan', name: 'Tiket Damri Bandara', price: 65000, desc: 'Rute eksekutif ke Soekarno-Hatta.' },
+            { id: 'k3', category: 'kendaraan', name: 'Tiket KAI Ekonomi', price: 120000, desc: 'Jakarta - Bandung (KA lokal).' }
+        ];
+
+        const categoryMeta = {
+            wisata: { label: 'Wisata', icon: iconMapPin() },
+            kendaraan: { label: 'Kendaraan', icon: iconBus() }
+        };
+
+        const API_TIMEOUT_MS = 15000;
+        const DEFAULT_API_EXEC_URL = ''; //input your API execution URL here if needed, or leave empty to auto-resolve
+        const API_EXEC_URL = resolveApiExecUrl_();
+        const PRINTER_STORAGE_KEY = 'mytix_last_printer';
+        const FORCED_PRINTER_LANGUAGE = resolveQueryParam_('lang');
+        const FORCED_CODEPAGE_MAPPING = resolveQueryParam_('cp');
+        const RECEIPT_COLUMNS_DEFAULT = 32;
+        const RECEIPT_COLUMNS_SUPPORTED = {
+            32: true,
+            35: true,
+            42: true,
+            44: true,
+            48: true
+        };
+        const FORCED_RECEIPT_COLUMNS = normalizeReceiptColumns_(resolveQueryParam_('cols'));
+        const SUPPORTED_CODEPAGE_MAPPINGS = {
+            'bixolon': true,
+            'bixolon-legacy': true,
+            'citizen': true,
+            'epson': true,
+            'epson-legacy': true,
+            'fujitsu': true,
+            'hp': true,
+            'metapace': true,
+            'mpt': true,
+            'pos-5890': true,
+            'pos-8360': true,
+            'star': true,
+            'xprinter': true,
+            'youku': true
+        };
+        const CODEPAGE_MAPPING_ALIASES = {
+            'bixolonlegacy': 'bixolon-legacy',
+            'epsonlegacy': 'epson-legacy',
+            'pos5890': 'pos-5890',
+            'pos8360': 'pos-8360',
+            'zjiang': 'pos-5890'
+        };
+
+        let products = [];
+        let cart = [];
+        let grandTotal = 0;
+        let activeCategory = 'all';
+        let isSubmittingPayment = false;
+        let isPrintingReceipt = false;
+        let isConnectingPrinter = false;
+        let lastCompletedTransaction = null;
+        let receiptPrinter = null;
+        let printerSettings = null;
+        let connectedPrinterName = '';
+        let isPrinterConnected = false;
+
+        const cashInput = document.getElementById('cash-input');
+        const paymentModal = document.getElementById('payment-modal');
+        const receiptModal = document.getElementById('receipt-modal');
+        const confirmPaymentButton = document.getElementById('confirm-payment-button');
+        const connectPrinterButton = document.getElementById('connect-printer-button');
+        const printReceiptButton = document.getElementById('print-receipt-button');
+        const rootEl = document.documentElement;
+
+        function init() {
+            applyResponsiveFixes();
+            scheduleResponsiveRechecks();
+            bindModalEvents();
+            setupBluetoothPrinter();
+            updateConnectPrinterButtonState();
+            updatePrintButtonState();
+            setGridMessage('Memuat produk...');
+            updateCart();
+            loadProducts();
+        }
+
+        function scheduleResponsiveRechecks() {
+            [120, 420, 1000, 2200].forEach((delayMs) => {
+                window.setTimeout(applyResponsiveFixes, delayMs);
+            });
+        }
+
+        function bindModalEvents() {
+            window.addEventListener('resize', applyResponsiveFixes);
+            window.addEventListener('orientationchange', applyResponsiveFixes);
+            if (window.visualViewport) {
+                window.visualViewport.addEventListener('resize', applyResponsiveFixes);
+            }
+
+            paymentModal.addEventListener('click', (event) => {
+                if (event.target === paymentModal) {
+                    closeModal();
+                }
+            });
+
+            receiptModal.addEventListener('click', (event) => {
+                if (event.target === receiptModal) {
+                    closeReceipt();
+                }
+            });
+
+            document.addEventListener('keydown', (event) => {
+                if (event.key === 'Escape') {
+                    closeModal();
+                    closeReceipt();
+                }
+            });
+        }
+
+        function applyResponsiveFixes() {
+            const isMobileView = shouldUseMobileView_();
+            const viewportScale = isMobileView ? getMobileViewportScale_() : 1;
+            const hasDesktopViewportMismatch = viewportScale > 1.1;
+
+            document.body.classList.toggle('mobile-view', isMobileView);
+            document.body.classList.toggle('mobile-desktop-viewport', isMobileView && hasDesktopViewportMismatch);
+            rootEl.style.setProperty('--mobile-font-scale', String(viewportScale));
+            syncStickyOffsets_();
+            syncBottomAreaHeight();
+        }
+
+        function shouldUseMobileView_() {
+            const ua = navigator.userAgent || '';
+            const hasMobileUA = /Android|iPhone|iPod|IEMobile|Windows Phone|Mobile/i.test(ua);
+            const isTouchDevice = (window.matchMedia && window.matchMedia('(pointer: coarse)').matches)
+                || navigator.maxTouchPoints > 0;
+            const shortestScreenSide = Math.min(window.screen.width || 0, window.screen.height || 0);
+
+            if (hasMobileUA) {
+                return true;
+            }
+
+            return isTouchDevice && shortestScreenSide > 0 && shortestScreenSide <= 1024;
+        }
+
+        function getMobileViewportScale_() {
+            const layoutViewportWidth = Math.max(
+                window.innerWidth || 0,
+                document.documentElement ? document.documentElement.clientWidth : 0
+            );
+            const shortestScreenSide = Math.min(window.screen.width || 0, window.screen.height || 0);
+
+            if (!layoutViewportWidth || !shortestScreenSide) {
+                return 1;
+            }
+
+            const ratio = layoutViewportWidth / shortestScreenSide;
+            if (ratio <= 1.1) {
+                return 1;
+            }
+
+            return Math.min(Math.max(ratio, 1), 2.6);
+        }
+
+        function syncBottomAreaHeight() {
+            const bottomActionInner = document.querySelector('.bottom-action-inner');
+            if (!bottomActionInner) {
+                return;
+            }
+
+            const measuredHeight = Math.ceil(bottomActionInner.getBoundingClientRect().height + 24);
+            rootEl.style.setProperty('--bottom-area-height', `${measuredHeight}px`);
+        }
+
+        function syncStickyOffsets_() {
+            const appHeader = document.querySelector('.app-header');
+            if (!appHeader) {
+                return;
+            }
+
+            const measuredHeaderHeight = Math.ceil(appHeader.getBoundingClientRect().height);
+            if (measuredHeaderHeight > 0) {
+                rootEl.style.setProperty('--header-height', `${measuredHeaderHeight}px`);
+            }
+        }
+
+        function setupBluetoothPrinter() {
+            if (typeof WebBluetoothReceiptPrinter !== 'function') {
+                connectedPrinterName = '';
+                isPrinterConnected = false;
+                return;
+            }
+
+            receiptPrinter = new WebBluetoothReceiptPrinter();
+
+            receiptPrinter.addEventListener('connected', (eventOrDevice) => {
+                applyPrinterConnection_(eventOrDevice);
+                updateConnectPrinterButtonState();
+            });
+
+            receiptPrinter.addEventListener('disconnected', () => {
+                printerSettings = null;
+                connectedPrinterName = '';
+                isPrinterConnected = false;
+                updateConnectPrinterButtonState();
+            });
+
+            updateConnectPrinterButtonState();
+        }
+
+        function extractPrinterPayload_(eventOrDevice) {
+            if (!eventOrDevice) {
+                return {};
+            }
+
+            const maybeDetail = eventOrDevice.detail && typeof eventOrDevice.detail === 'object'
+                ? eventOrDevice.detail
+                : eventOrDevice;
+
+            if (maybeDetail.device && typeof maybeDetail.device === 'object') {
+                return maybeDetail.device;
+            }
+
+            return maybeDetail;
+        }
+
+        function applyPrinterConnection_(eventOrDevice) {
+            const device = extractPrinterPayload_(eventOrDevice);
+            if (!device || typeof device !== 'object') {
+                return;
+            }
+
+            const normalizedLanguage = normalizePrinterLanguage_(device.language || 'esc-pos');
+            const normalizedCodepageMapping = normalizeCodepageMapping_(device.codepageMapping);
+            const normalizedColumns = normalizeReceiptColumns_(device.columns);
+            printerSettings = {
+                language: normalizedLanguage,
+                codepageMapping: normalizedCodepageMapping || undefined,
+                columns: normalizedColumns || undefined
+            };
+            connectedPrinterName = String(device.name || 'Printer Bluetooth');
+            isPrinterConnected = true;
+            rememberPrinter_(device);
+        }
+
+        function updatePrintButtonState() {
+            if (!printReceiptButton) {
+                return;
+            }
+
+            const hasReceipt = !!lastCompletedTransaction;
+            printReceiptButton.disabled = !hasReceipt || isPrintingReceipt;
+            printReceiptButton.innerText = isPrintingReceipt
+                ? 'Mencetak...'
+                : 'Cetak Struk (Bluetooth)';
+        }
+
+        function setPrintingState_(isPrinting) {
+            isPrintingReceipt = isPrinting;
+            updatePrintButtonState();
+        }
+
+        function updateConnectPrinterButtonState() {
+            if (!connectPrinterButton) {
+                return;
+            }
+
+            connectPrinterButton.disabled = isConnectingPrinter;
+
+            if (isConnectingPrinter) {
+                connectPrinterButton.innerText = 'Menghubungkan...';
+                return;
+            }
+
+            if (connectedPrinterName) {
+                connectPrinterButton.innerText = `Printer: ${connectedPrinterName}`;
+                return;
+            }
+
+            connectPrinterButton.innerText = 'Hubungkan Printer Bluetooth';
+        }
+
+        function setConnectingPrinterState_(isConnecting) {
+            isConnectingPrinter = isConnecting;
+            updateConnectPrinterButtonState();
+        }
+
+        function getBluetoothContextIssue_() {
+            if (!window.isSecureContext) {
+                return 'Koneksi printer Bluetooth hanya bisa di HTTPS (URL Web App GAS).';
+            }
+
+            const permissionPolicy = document.permissionsPolicy || document.featurePolicy;
+            if (permissionPolicy && typeof permissionPolicy.allowsFeature === 'function') {
+                try {
+                    if (!permissionPolicy.allowsFeature('bluetooth')) {
+                        return 'Bluetooth diblokir oleh halaman ini. Buka Web App GAS langsung di tab browser (URL /exec), bukan dari panel editor Apps Script.';
+                    }
+                } catch (error) {
+                    // Ignore permission-policy API quirks and continue checks.
+                }
+            }
+
+            if (window.top !== window.self) {
+                return 'Bluetooth tidak bisa dipakai di mode embed/panel. Buka URL deploy Web App langsung di tab baru.';
+            }
+
+            if (!navigator.bluetooth) {
+                return 'Browser belum mendukung Web Bluetooth. Gunakan Chrome Android terbaru.';
+            }
+
+            return '';
+        }
+
+        async function connectPrinterManually() {
+            if (isConnectingPrinter) {
+                return;
+            }
+
+            const contextIssue = getBluetoothContextIssue_();
+            if (contextIssue) {
+                alert(contextIssue);
+                return;
+            }
+
+            if (typeof WebBluetoothReceiptPrinter !== 'function') {
+                alert('Modul printer belum termuat. Periksa koneksi internet lalu refresh.');
+                return;
+            }
+
+            if (!receiptPrinter) {
+                setupBluetoothPrinter();
+            }
+
+            if (!receiptPrinter) {
+                alert('Inisialisasi printer Bluetooth gagal.');
+                return;
+            }
+
+            setConnectingPrinterState_(true);
+            try {
+                const device = await receiptPrinter.connect();
+                applyPrinterConnection_(device);
+                await waitForPrinterSettings_(2500);
+                if (!isPrinterConnected || !printerSettings) {
+                    throw new Error('Printer belum terhubung. Coba pilih printer lagi.');
+                }
+                alert(`Printer terhubung: ${connectedPrinterName}`);
+            } catch (error) {
+                console.error(error);
+                alert(parsePrinterError_(error));
+            } finally {
+                setConnectingPrinterState_(false);
+                updateConnectPrinterButtonState();
+            }
+        }
+
+        async function printReceipt() {
+            if (!lastCompletedTransaction) {
+                alert('Belum ada struk transaksi untuk dicetak.');
+                return;
+            }
+
+            if (isPrintingReceipt) {
+                return;
+            }
+
+            const contextIssue = getBluetoothContextIssue_();
+            if (contextIssue) {
+                alert(contextIssue);
+                return;
+            }
+
+            if (typeof ReceiptPrinterEncoder !== 'function' || typeof WebBluetoothReceiptPrinter !== 'function') {
+                alert('Modul printer belum termuat. Periksa koneksi internet lalu refresh halaman.');
+                return;
+            }
+
+            setPrintingState_(true);
+
+            try {
+                await ensureBluetoothPrinterConnected_();
+                const data = buildBluetoothReceiptData_(lastCompletedTransaction);
+                await receiptPrinter.print(data);
+                alert('Data struk berhasil dikirim ke printer Bluetooth.');
+            } catch (error) {
+                console.error(error);
+                if (error && /messageSize/i.test(String(error.message || ''))) {
+                    isPrinterConnected = false;
+                    printerSettings = null;
+                    connectedPrinterName = '';
+                    updateConnectPrinterButtonState();
+                }
+                alert(parsePrinterError_(error));
+            } finally {
+                setPrintingState_(false);
+            }
+        }
+
+        async function ensureBluetoothPrinterConnected_() {
+            if (!receiptPrinter) {
+                throw new Error('Inisialisasi printer Bluetooth gagal.');
+            }
+
+            if (isPrinterConnected && printerSettings) {
+                return;
+            }
+
+            const rememberedPrinter = getRememberedPrinter_();
+            if (rememberedPrinter && typeof receiptPrinter.reconnect === 'function') {
+                try {
+                    const reconnected = await receiptPrinter.reconnect(rememberedPrinter);
+                    applyPrinterConnection_(reconnected);
+                    await waitForPrinterSettings_(1200);
+                    if (isPrinterConnected && printerSettings) {
+                        return;
+                    }
+                } catch (error) {
+                    console.warn('Reconnect printer gagal, lanjut connect manual.', error);
+                }
+            }
+
+            const connected = await receiptPrinter.connect();
+            applyPrinterConnection_(connected);
+            await waitForPrinterSettings_(2500);
+            if (!isPrinterConnected || !printerSettings) {
+                throw new Error('Printer belum terhubung. Pilih perangkat printer lagi.');
+            }
+        }
+
+        function waitForPrinterSettings_(timeoutMs) {
+            if (isPrinterConnected && printerSettings) {
+                return Promise.resolve();
+            }
+
+            return new Promise((resolve) => {
+                const start = Date.now();
+                const timer = window.setInterval(() => {
+                    if ((isPrinterConnected && printerSettings) || Date.now() - start >= timeoutMs) {
+                        window.clearInterval(timer);
+                        resolve();
+                    }
+                }, 120);
+            });
+        }
+
+        function getRememberedPrinter_() {
+            try {
+                const rawValue = window.localStorage.getItem(PRINTER_STORAGE_KEY);
+                if (!rawValue) {
+                    return null;
+                }
+
+                const parsedValue = JSON.parse(rawValue);
+                if (!parsedValue || typeof parsedValue !== 'object' || !parsedValue.id) {
+                    return null;
+                }
+
+                const normalizedLanguage = normalizePrinterLanguage_(parsedValue.language || 'esc-pos');
+                const normalizedCodepageMapping = normalizeCodepageMapping_(parsedValue.codepageMapping);
+                const normalizedColumns = normalizeReceiptColumns_(parsedValue.columns);
+
+                return {
+                    id: String(parsedValue.id),
+                    name: String(parsedValue.name || ''),
+                    type: String(parsedValue.type || 'bluetooth'),
+                    language: normalizedLanguage,
+                    codepageMapping: normalizedCodepageMapping || undefined,
+                    columns: normalizedColumns || undefined
+                };
+            } catch (error) {
+                return null;
+            }
+        }
+
+        function rememberPrinter_(device) {
+            if (!device || !device.id) {
+                return;
+            }
+
+            const normalizedLanguage = normalizePrinterLanguage_(device.language || 'esc-pos');
+            const normalizedCodepageMapping = normalizeCodepageMapping_(device.codepageMapping);
+            const normalizedColumns = normalizeReceiptColumns_(device.columns || (printerSettings && printerSettings.columns));
+            const storableDevice = {
+                id: String(device.id),
+                name: String(device.name || ''),
+                type: String(device.type || 'bluetooth'),
+                language: normalizedLanguage,
+                codepageMapping: normalizedCodepageMapping || undefined,
+                columns: normalizedColumns || undefined
+            };
+
+            try {
+                window.localStorage.setItem(PRINTER_STORAGE_KEY, JSON.stringify(storableDevice));
+            } catch (error) {
+                console.warn('Menyimpan device printer gagal.', error);
+            }
+        }
+
+        function parsePrinterError_(error) {
+            if (!error) {
+                return 'Gagal mencetak struk via Bluetooth.';
+            }
+
+            const rawMessage = String(error.message || '').trim();
+
+            if (/messageSize/i.test(rawMessage)) {
+                return 'Printer belum siap dipakai. Hubungkan ulang lewat tombol "Hubungkan Printer Bluetooth", lalu coba cetak lagi.';
+            }
+
+            if (/unknown codepage mapping/i.test(rawMessage)) {
+                return 'Codepage printer tidak dikenali. Sistem sudah mencoba fallback otomatis, coba hubungkan ulang printer lalu cetak lagi.';
+            }
+
+            if (error.name === 'NotFoundError') {
+                return 'Tidak ada printer yang dipilih pada dialog Bluetooth.';
+            }
+
+            if (error.name === 'SecurityError') {
+                return 'Akses Bluetooth ditolak. Pastikan gunakan HTTPS dan beri izin Bluetooth.';
+            }
+
+            if (error.name === 'NotAllowedError') {
+                return 'Akses Bluetooth ditolak oleh browser/permission.';
+            }
+
+            if (!rawMessage) {
+                return 'Gagal mencetak struk via Bluetooth.';
+            }
+
+            if (/user cancelled|cancelled|aborted/i.test(rawMessage)) {
+                return 'Pemilihan printer dibatalkan.';
+            }
+
+            return rawMessage;
+        }
+
+        function buildBluetoothReceiptData_(transaction) {
+            const width = getReceiptColumns_();
+            let encoder = null;
+            try {
+                encoder = createReceiptEncoder_();
+            } catch (error) {
+                console.warn('Encoder setup fallback dipakai:', error);
+                try {
+                    encoder = new ReceiptPrinterEncoder({
+                        language: 'esc-pos',
+                        columns: width,
+                        codepageMapping: 'epson'
+                    });
+                } catch (fallbackError) {
+                    console.warn('Fallback epson gagal, pakai default encoder.', fallbackError);
+                    try {
+                        encoder = new ReceiptPrinterEncoder({
+                            language: 'esc-pos',
+                            columns: width
+                        });
+                    } catch (finalError) {
+                        console.warn('Fallback esc-pos gagal, pakai konfigurasi encoder default.', finalError);
+                        encoder = new ReceiptPrinterEncoder({ columns: width });
+                    }
+                }
+            }
+            const safeItems = Array.isArray(transaction.items) ? transaction.items : [];
+
+            encoder = encoder
+                .initialize()
+                .align('center')
+                .bold(true)
+                .line('MYTIX POS')
+                .bold(false)
+                .line('Official Receipt')
+                .newline()
+                .align('left')
+                .line(`No: ${sanitizePrintText_(transaction.transactionId, Math.max(10, width - 4))}`)
+                .line(`Tanggal: ${sanitizePrintText_(transaction.createdAtDisplay, Math.max(10, width - 9))}`)
+                .line(`Metode: ${sanitizePrintText_(transaction.paymentMethodLabel, Math.max(8, width - 8))}`)
+                .line('-'.repeat(width));
+
+            safeItems.forEach((item) => {
+                const qty = toPositiveInteger(item.qty);
+                const unitPrice = toPositiveInteger(item.unitPrice);
+                const subtotal = toPositiveInteger(item.subtotal);
+                const itemNameLines = wrapReceiptText_(item.name || item.id || '-', width);
+
+                itemNameLines.forEach((lineText) => {
+                    encoder = encoder.line(lineText);
+                });
+
+                encoder = encoder
+                    .line(formatReceiptLine_(`  ${qty} x ${formatReceiptAmountCompact_(unitPrice)}`, formatReceiptAmountCompact_(subtotal), width));
+            });
+
+            encoder = encoder
+                .line('-'.repeat(width))
+                .bold(true)
+                .line(formatReceiptLine_('TOTAL', formatReceiptAmount_(transaction.total), width))
+                .bold(false)
+                .line(formatReceiptLine_('Bayar', formatReceiptAmount_(transaction.cashReceived), width))
+                .line(formatReceiptLine_('Kembalian', formatReceiptAmount_(transaction.changeAmount), width))
+                .newline()
+                .align('center')
+                .line('Terima kasih')
+                .line('Simpan struk ini')
+                .newline()
+                .cut();
+
+            return encoder.encode();
+        }
+
+        function normalizePrinterLanguage_(languageValue) {
+            const normalized = String(languageValue || '').trim().toLowerCase();
+            if (!normalized) {
+                return 'esc-pos';
+            }
+
+            if (normalized === 'star-prnt') {
+                return 'star-prnt';
+            }
+
+            if (normalized === 'star-line') {
+                return 'star-line';
+            }
+
+            return 'esc-pos';
+        }
+
+        function normalizeReceiptColumns_(value) {
+            const numericValue = Number(value);
+            if (!Number.isFinite(numericValue)) {
+                return 0;
+            }
+
+            const roundedValue = Math.round(numericValue);
+            if (!RECEIPT_COLUMNS_SUPPORTED[roundedValue]) {
+                return 0;
+            }
+
+            return roundedValue;
+        }
+
+        function getReceiptColumns_() {
+            if (FORCED_RECEIPT_COLUMNS) {
+                return FORCED_RECEIPT_COLUMNS;
+            }
+
+            const connectedColumns = normalizeReceiptColumns_(printerSettings && printerSettings.columns);
+            if (connectedColumns) {
+                return connectedColumns;
+            }
+
+            return RECEIPT_COLUMNS_DEFAULT;
+        }
+
+        function normalizeCodepageMapping_(mappingValue) {
+            if (mappingValue && typeof mappingValue === 'object' && !Array.isArray(mappingValue)) {
+                const customMapping = sanitizeCustomCodepageMapping_(mappingValue);
+                return customMapping || '';
+            }
+
+            const normalized = String(mappingValue || '').trim().toLowerCase();
+            if (!normalized || normalized === 'default' || normalized === 'auto' || normalized === 'unknown' || normalized === 'none') {
+                return '';
+            }
+
+            const mappedAlias = CODEPAGE_MAPPING_ALIASES[normalized] || normalized;
+            if (!SUPPORTED_CODEPAGE_MAPPINGS[mappedAlias]) {
+                return '';
+            }
+
+            return mappedAlias;
+        }
+
+        function sanitizeCustomCodepageMapping_(mappingObject) {
+            const safeMapping = {};
+            const keys = Object.keys(mappingObject || {});
+            keys.forEach((key) => {
+                const normalizedKey = String(key || '').trim().toLowerCase();
+                const rawValue = mappingObject[key];
+                const numericValue = Number(rawValue);
+                if (/^cp\d+$/i.test(normalizedKey) && Number.isFinite(numericValue) && numericValue >= 0) {
+                    safeMapping[normalizedKey] = numericValue;
+                }
+            });
+
+            return Object.keys(safeMapping).length ? safeMapping : null;
+        }
+
+        function createReceiptEncoder_() {
+            const connectedLanguage = normalizePrinterLanguage_(printerSettings && printerSettings.language);
+            const forcedLanguage = normalizePrinterLanguage_(FORCED_PRINTER_LANGUAGE);
+            const language = FORCED_PRINTER_LANGUAGE ? forcedLanguage : connectedLanguage;
+            const forcedMapping = normalizeCodepageMapping_(FORCED_CODEPAGE_MAPPING);
+            const preferredMapping = forcedMapping || normalizeCodepageMapping_(printerSettings && printerSettings.codepageMapping);
+            const columns = getReceiptColumns_();
+            const attempts = [];
+
+            if (preferredMapping) {
+                attempts.push({ language, columns, codepageMapping: preferredMapping });
+            }
+
+            if (language === 'esc-pos') {
+                attempts.push({ language, columns, codepageMapping: 'epson' });
+                attempts.push({ language, columns, codepageMapping: 'xprinter' });
+                attempts.push({ language, columns, codepageMapping: 'pos-5890' });
+                attempts.push({ language, columns, codepageMapping: 'mpt' });
+                attempts.push({ language, columns, codepageMapping: 'star' });
+            }
+
+            attempts.push({ language, columns });
+            attempts.push({ columns });
+            attempts.push({ language });
+            attempts.push({});
+
+            const seen = {};
+            for (const option of attempts) {
+                const key = JSON.stringify(option);
+                if (seen[key]) {
+                    continue;
+                }
+                seen[key] = true;
+
+                try {
+                    return new ReceiptPrinterEncoder(option);
+                } catch (error) {
+                    const message = String(error && error.message ? error.message : '');
+                    if (/unknown codepage mapping/i.test(message)) {
+                        continue;
+                    }
+                    throw error;
+                }
+            }
+
+            return new ReceiptPrinterEncoder();
+        }
+
+        function sanitizePrintText_(value, maxLength) {
+            const cleanText = String(value || '')
+                .replace(/[\u0000-\u001f\u007f]/g, '')
+                .replace(/\s+/g, ' ')
+                .trim();
+
+            if (!maxLength || cleanText.length <= maxLength) {
+                return cleanText;
+            }
+
+            return cleanText.slice(0, maxLength);
+        }
+
+        function wrapReceiptText_(value, width) {
+            const safeWidth = Math.max(8, toPositiveInteger(width));
+            const cleanText = sanitizePrintText_(value, 220);
+            if (!cleanText) {
+                return ['-'];
+            }
+
+            if (cleanText.length <= safeWidth) {
+                return [cleanText];
+            }
+
+            const words = cleanText.split(' ');
+            const lines = [];
+            let currentLine = '';
+
+            words.forEach((word) => {
+                if (!word) {
+                    return;
+                }
+
+                if (word.length > safeWidth) {
+                    if (currentLine) {
+                        lines.push(currentLine);
+                        currentLine = '';
+                    }
+
+                    let remaining = word;
+                    while (remaining.length > safeWidth) {
+                        lines.push(remaining.slice(0, safeWidth));
+                        remaining = remaining.slice(safeWidth);
+                    }
+                    currentLine = remaining;
+                    return;
+                }
+
+                const nextLine = currentLine ? `${currentLine} ${word}` : word;
+                if (nextLine.length > safeWidth) {
+                    lines.push(currentLine);
+                    currentLine = word;
+                    return;
+                }
+
+                currentLine = nextLine;
+            });
+
+            if (currentLine) {
+                lines.push(currentLine);
+            }
+
+            return lines.length ? lines : [cleanText.slice(0, safeWidth)];
+        }
+
+        function formatReceiptLine_(leftText, rightText, width) {
+            const safeRight = sanitizePrintText_(rightText, width - 1);
+            const maxLeftLength = Math.max(1, width - safeRight.length - 1);
+            const safeLeft = sanitizePrintText_(leftText, maxLeftLength);
+            const spacing = Math.max(1, width - safeLeft.length - safeRight.length);
+
+            return `${safeLeft}${' '.repeat(spacing)}${safeRight}`;
+        }
+
+        function formatReceiptAmountCompact_(value) {
+            return formatNumberID(toPositiveInteger(value));
+        }
+
+        function formatReceiptAmount_(value) {
+            return `Rp ${formatReceiptAmountCompact_(value)}`;
+        }
+
+        function resolveApiExecUrl_() {
+            try {
+                const queryApi = resolveQueryParam_('api');
+                if (queryApi) {
+                    return normalizeApiUrl_(queryApi);
+                }
+            } catch (error) {
+                console.warn('Gagal membaca parameter query API.', error);
+            }
+
+            const globalApi = typeof window.MYTIX_API_EXEC_URL === 'string' ? window.MYTIX_API_EXEC_URL : '';
+            if (globalApi.trim()) {
+                return normalizeApiUrl_(globalApi);
+            }
+
+            return normalizeApiUrl_(DEFAULT_API_EXEC_URL);
+        }
+
+        function resolveQueryParam_(paramName) {
+            try {
+                return new URLSearchParams(window.location.search).get(paramName);
+            } catch (error) {
+                return '';
+            }
+        }
+
+        function normalizeApiUrl_(urlValue) {
+            const normalizedValue = String(urlValue || '').trim();
+            if (!normalizedValue) {
+                return '';
+            }
+
+            return normalizedValue.replace(/[?&]$/, '');
+        }
+
+        function getBackendMode_() {
+            if (isAppsScriptRuntime()) {
+                return 'apps-script-runtime';
+            }
+
+            if (API_EXEC_URL) {
+                return 'http-api';
+            }
+
+            return 'local-fallback';
+        }
+
+        function loadProducts() {
+            if (getBackendMode_() === 'local-fallback') {
+                products = fallbackProducts.map(normalizeProduct).filter(Boolean);
+                renderProducts(activeCategory);
+                return;
+            }
+
+            callServer('getProducts')
+                .then((response) => {
+                    if (!response || response.ok !== true || !Array.isArray(response.data)) {
+                        throw new Error('Respon data produk tidak valid.');
+                    }
+                    products = response.data.map(normalizeProduct).filter(Boolean);
+                    renderProducts(activeCategory);
+                })
+                .catch((error) => {
+                    console.error(error);
+                    products = fallbackProducts.map(normalizeProduct).filter(Boolean);
+                    renderProducts(activeCategory);
+                    alert('Gagal memuat produk dari server. Aplikasi memakai data lokal sementara.');
+                });
+        }
+
+        function isAppsScriptRuntime() {
+            return typeof google !== 'undefined' && google.script && google.script.run;
+        }
+
+        function callServer(methodName, ...args) {
+            if (isAppsScriptRuntime()) {
+                return callAppsScriptServer_(methodName, ...args);
+            }
+
+            return callHttpApiServer_(methodName, ...args);
+        }
+
+        function callAppsScriptServer_(methodName, ...args) {
+            return new Promise((resolve, reject) => {
+                if (!isAppsScriptRuntime()) {
+                    reject(new Error('Runtime Google Apps Script tidak tersedia.'));
+                    return;
+                }
+
+                let settled = false;
+                const timeoutId = window.setTimeout(() => {
+                    if (!settled) {
+                        settled = true;
+                        reject(new Error('Permintaan ke server melebihi batas waktu.'));
+                    }
+                }, API_TIMEOUT_MS);
+
+                const onSuccess = (result) => {
+                    if (settled) {
+                        return;
+                    }
+                    settled = true;
+                    window.clearTimeout(timeoutId);
+                    resolve(result);
+                };
+
+                const onFailure = (error) => {
+                    if (settled) {
+                        return;
+                    }
+                    settled = true;
+                    window.clearTimeout(timeoutId);
+                    reject(new Error(error && error.message ? error.message : 'Terjadi kesalahan dari server.'));
+                };
+
+                const runner = google.script.run
+                    .withSuccessHandler(onSuccess)
+                    .withFailureHandler(onFailure);
+
+                if (typeof runner[methodName] !== 'function') {
+                    settled = true;
+                    window.clearTimeout(timeoutId);
+                    reject(new Error(`Fungsi server "${methodName}" tidak ditemukan.`));
+                    return;
+                }
+
+                runner[methodName](...args);
+            });
+        }
+
+        function callHttpApiServer_(methodName, ...args) {
+            if (methodName === 'getProducts') {
+                return callHttpApi_('products');
+            }
+
+            if (methodName === 'createTransaction') {
+                const payload = args && args.length ? args[0] : {};
+                return callHttpApi_('create-transaction', payload);
+            }
+
+            return Promise.reject(new Error(`Method "${methodName}" tidak didukung di mode HTTP API.`));
+        }
+
+        async function callHttpApi_(action, payload) {
+            if (!API_EXEC_URL) {
+                throw new Error('URL API Apps Script belum diset.');
+            }
+
+            const endpointUrl = buildApiEndpointUrl_(action);
+            const controller = new AbortController();
+            const timeoutId = window.setTimeout(() => controller.abort(), API_TIMEOUT_MS);
+
+            try {
+                let response;
+
+                if (action === 'create-transaction') {
+                    const body = JSON.stringify({
+                        action,
+                        payload: payload || {},
+                    });
+
+                    response = await fetch(endpointUrl, {
+                        method: 'POST',
+                        headers: {
+                            'Content-Type': 'text/plain',
+                        },
+                        body,
+                        signal: controller.signal,
+                        cache: 'no-store',
+                    });
+                } else {
+                    response = await fetch(endpointUrl, {
+                        method: 'GET',
+                        signal: controller.signal,
+                        cache: 'no-store',
+                    });
+                }
+
+                const rawBody = await response.text();
+                if (!rawBody || !rawBody.trim()) {
+                    throw new Error('Respon API kosong.');
+                }
+
+                let parsedResponse = null;
+                try {
+                    parsedResponse = JSON.parse(rawBody);
+                } catch (error) {
+                    throw new Error('Respon API bukan JSON valid. Pastikan endpoint Apps Script sudah mode API terbaru.');
+                }
+
+                if (!response.ok) {
+                    const errorMessage = parsedResponse && parsedResponse.error && parsedResponse.error.message
+                        ? parsedResponse.error.message
+                        : `HTTP ${response.status}`;
+                    throw new Error(errorMessage);
+                }
+
+                if (!parsedResponse || typeof parsedResponse !== 'object') {
+                    throw new Error('Format respon API tidak valid.');
+                }
+
+                if (parsedResponse.ok !== true) {
+                    const errorMessage = parsedResponse.error && parsedResponse.error.message
+                        ? parsedResponse.error.message
+                        : 'Permintaan API gagal.';
+                    throw new Error(errorMessage);
+                }
+
+                return parsedResponse;
+            } catch (error) {
+                if (error && error.name === 'AbortError') {
+                    throw new Error('Permintaan API timeout.');
+                }
+
+                throw error;
+            } finally {
+                window.clearTimeout(timeoutId);
+            }
+        }
+
+        function buildApiEndpointUrl_(action) {
+            try {
+                const urlObj = new URL(API_EXEC_URL);
+                urlObj.searchParams.set('action', action);
+                return urlObj.toString();
+            } catch (error) {
+                const separator = API_EXEC_URL.includes('?') ? '&' : '?';
+                return `${API_EXEC_URL}${separator}action=${encodeURIComponent(action)}`;
+            }
+        }
+
+        function filterCategory(category, buttonEl) {
+            activeCategory = category;
+            document.querySelectorAll('.pill').forEach((pill) => pill.classList.remove('active'));
+            buttonEl.classList.add('active');
+            renderProducts(category);
+        }
+
+        function renderProducts(category) {
+            const grid = document.getElementById('ticket-grid');
+            grid.innerHTML = '';
+
+            if (!products.length) {
+                setGridMessage('Produk belum tersedia.');
+                return;
+            }
+
+            const filteredProducts = category === 'all'
+                ? products
+                : products.filter((product) => product.category === category);
+
+            if (!filteredProducts.length) {
+                setGridMessage('Produk untuk kategori ini belum tersedia.');
+                return;
+            }
+
+            filteredProducts.forEach((item) => {
+                const card = document.createElement('article');
+                card.className = 'ticket-card';
+                card.onclick = () => addToCart(item);
+
+                const meta = categoryMeta[item.category] || { label: 'Lainnya', icon: iconGrid() };
+                const compactPrice = formatNumberID(item.price);
+                const longPriceClass = compactPrice.length >= 8 ? 'is-long' : '';
+                card.innerHTML = `
+                    <div class="ticket-main">
+                        <span class="ticket-meta ${item.category}">${meta.icon}${meta.label}</span>
+                        <h3>${escapeHtml(item.name)}</h3>
+                        <p>${escapeHtml(item.desc)}</p>
+                    </div>
+                    <span class="ticket-divider" aria-hidden="true">
+                        <span class="ticket-divider-line"></span>
+                    </span>
+                    <div class="ticket-side">
+                        <span class="price-label">Harga</span>
+                        <span class="price-tag ${longPriceClass}">
+                            <span class="price-currency">Rp</span>
+                            <span class="price-value">${compactPrice}</span>
+                        </span>
+                    </div>
+                `;
+
+                grid.appendChild(card);
+            });
+        }
+
+        function setGridMessage(message) {
+            const grid = document.getElementById('ticket-grid');
+            grid.innerHTML = `<div class="empty-state">${escapeHtml(message)}</div>`;
+        }
+
+        function normalizeProduct(rawProduct) {
+            if (!rawProduct || typeof rawProduct !== 'object') {
+                return null;
+            }
+
+            const id = String(rawProduct.id || '').trim();
+            const name = String(rawProduct.name || '').trim();
+            const category = String(rawProduct.category || 'lainnya').trim().toLowerCase();
+            const desc = String(rawProduct.desc || '').trim();
+            const price = toPositiveInteger(rawProduct.price);
+
+            if (!id || !name || price <= 0) {
+                return null;
+            }
+
+            return { id, category, name, desc, price };
+        }
+
+        function toPositiveInteger(value) {
+            const numericValue = Number(value);
+            if (!Number.isFinite(numericValue) || numericValue <= 0) {
+                return 0;
+            }
+            return Math.floor(numericValue);
+        }
+
+        function addToCart(item) {
+            const foundItem = cart.find((cartItem) => cartItem.id === item.id);
+            if (foundItem) {
+                foundItem.qty += 1;
+            } else {
+                cart.push({ ...item, qty: 1 });
+            }
+
+            updateCart();
+            vibrate();
+        }
+
+        function updateCart() {
+            const count = cart.reduce((accumulator, item) => accumulator + item.qty, 0);
+            grandTotal = cart.reduce((accumulator, item) => accumulator + (item.price * item.qty), 0);
+
+            document.getElementById('cart-count').innerText = count;
+            document.getElementById('bottom-total-text').innerText = formatIDR(grandTotal);
+            document.getElementById('checkout-button').disabled = count === 0;
+        }
+
+        function openCheckout() {
+            if (cart.length === 0) {
+                alert('Keranjang masih kosong.');
+                return;
+            }
+
+            document.getElementById('modal-grand-total').innerText = formatIDR(grandTotal);
+            paymentModal.classList.add('active');
+            paymentModal.setAttribute('aria-hidden', 'false');
+            calculateChange();
+            cashInput.focus();
+        }
+
+        function closeModal() {
+            paymentModal.classList.remove('active');
+            paymentModal.setAttribute('aria-hidden', 'true');
+        }
+
+        function setCash(type) {
+            if (type === 'pas') {
+                cashInput.value = grandTotal;
+            }
+            calculateChange();
+        }
+
+        function addCash(value) {
+            const current = parseMoneyInput(cashInput.value);
+            cashInput.value = current + value;
+            calculateChange();
+        }
+
+        function clearCash() {
+            cashInput.value = '';
+            calculateChange();
+        }
+
+        function roundTotal() {
+            cashInput.value = Math.ceil(grandTotal / 1000) * 1000;
+            calculateChange();
+        }
+
+        function parseMoneyInput(value) {
+            const numericValue = Number(value);
+            if (!Number.isFinite(numericValue) || numericValue <= 0) {
+                return 0;
+            }
+            return Math.floor(numericValue);
+        }
+
+        function calculateChange() {
+            const cashValue = parseMoneyInput(cashInput.value);
+            const changeValue = cashValue - grandTotal;
+            const changeEl = document.getElementById('change-text');
+
+            if (changeValue < 0) {
+                changeEl.innerText = `-${formatIDR(Math.abs(changeValue))}`;
+                changeEl.style.color = 'var(--danger)';
+                return;
+            }
+
+            changeEl.innerText = formatIDR(changeValue);
+            changeEl.style.color = 'var(--success)';
+        }
+
+        function processPayment() {
+            if (isSubmittingPayment) {
+                return;
+            }
+
+            if (cart.length === 0) {
+                alert('Keranjang masih kosong.');
+                return;
+            }
+
+            const cashValue = parseMoneyInput(cashInput.value);
+            if (cashValue < grandTotal) {
+                alert('Nominal pembayaran kurang.');
+                cashInput.focus();
+                return;
+            }
+
+            const payload = {
+                paymentMethod: 'cash',
+                cashReceived: cashValue,
+                items: cart.map((item) => ({ id: item.id, qty: item.qty }))
+            };
+
+            const handleSuccess = (transactionData) => {
+                renderReceipt(transactionData);
+                closeModal();
+                receiptModal.classList.add('active');
+                receiptModal.setAttribute('aria-hidden', 'false');
+            };
+
+            const handleFailure = (error) => {
+                alert(error.message || 'Gagal memproses pembayaran. Coba lagi.');
+            };
+
+            isSubmittingPayment = true;
+            if (confirmPaymentButton) {
+                confirmPaymentButton.disabled = true;
+                confirmPaymentButton.innerText = 'Memproses...';
+            }
+
+            if (getBackendMode_() === 'local-fallback') {
+                const fallbackTransaction = buildLocalTransactionResult(cashValue);
+                handleSuccess(fallbackTransaction);
+                isSubmittingPayment = false;
+                if (confirmPaymentButton) {
+                    confirmPaymentButton.disabled = false;
+                    confirmPaymentButton.innerText = 'Konfirmasi Pembayaran';
+                }
+                return;
+            }
+
+            callServer('createTransaction', payload)
+                .then((response) => {
+                    if (!response || response.ok !== true || !response.data) {
+                        throw new Error('Respon transaksi dari server tidak valid.');
+                    }
+                    handleSuccess(response.data);
+                })
+                .catch((error) => {
+                    console.error(error);
+                    handleFailure(error);
+                })
+                .finally(() => {
+                    isSubmittingPayment = false;
+                    if (confirmPaymentButton) {
+                        confirmPaymentButton.disabled = false;
+                        confirmPaymentButton.innerText = 'Konfirmasi Pembayaran';
+                    }
+                });
+        }
+
+        function buildLocalTransactionResult(cashValue) {
+            const transactionDate = new Date();
+            return {
+                transactionId: buildTransactionId(transactionDate),
+                createdAtDisplay: transactionDate.toLocaleString('id-ID'),
+                paymentMethod: 'cash',
+                paymentMethodLabel: 'Tunai',
+                total: grandTotal,
+                cashReceived: cashValue,
+                changeAmount: cashValue - grandTotal,
+                items: cart.map((item) => ({
+                    id: item.id,
+                    name: item.name,
+                    qty: item.qty,
+                    unitPrice: item.price,
+                    subtotal: item.price * item.qty
+                }))
+            };
+        }
+
+        function normalizeTransactionForReceipt_(transaction) {
+            const safeItems = Array.isArray(transaction && transaction.items) ? transaction.items : [];
+            return {
+                transactionId: String(transaction && transaction.transactionId ? transaction.transactionId : buildTransactionId(new Date())),
+                createdAtDisplay: String(transaction && transaction.createdAtDisplay ? transaction.createdAtDisplay : new Date().toLocaleString('id-ID')),
+                paymentMethodLabel: String(transaction && transaction.paymentMethodLabel ? transaction.paymentMethodLabel : 'Tunai'),
+                total: toPositiveInteger(transaction && transaction.total),
+                cashReceived: toPositiveInteger(transaction && transaction.cashReceived),
+                changeAmount: toPositiveInteger(transaction && transaction.changeAmount),
+                items: safeItems.map((item) => ({
+                    id: String(item && item.id ? item.id : ''),
+                    name: String(item && item.name ? item.name : item && item.id ? item.id : '-'),
+                    qty: toPositiveInteger(item && item.qty),
+                    unitPrice: toPositiveInteger(item && item.unitPrice),
+                    subtotal: toPositiveInteger(item && item.subtotal)
+                }))
+            };
+        }
+
+        function renderReceipt(transaction) {
+            const normalizedTransaction = normalizeTransactionForReceipt_(transaction);
+            lastCompletedTransaction = normalizedTransaction;
+            updatePrintButtonState();
+
+            const transactionId = escapeHtml(normalizedTransaction.transactionId);
+            const createdAt = escapeHtml(normalizedTransaction.createdAtDisplay);
+            const paymentMethodLabel = escapeHtml(normalizedTransaction.paymentMethodLabel);
+            const total = normalizedTransaction.total;
+            const cashReceived = normalizedTransaction.cashReceived;
+            const changeAmount = normalizedTransaction.changeAmount;
+
+            const safeItems = normalizedTransaction.items;
+            const receiptItems = safeItems.map((item) => `
+                <tr>
+                    <td>
+                        <span class="receipt-item-name">${escapeHtml(item.name || item.id || '-')}</span>
+                        <span class="receipt-item-qty">${toPositiveInteger(item.qty)} x ${formatIDR(toPositiveInteger(item.unitPrice))}</span>
+                    </td>
+                    <td>${formatIDR(toPositiveInteger(item.subtotal))}</td>
+                </tr>
+            `).join('');
+
+            const receiptHTML = `
+                <div class="receipt-paper">
+                    <div class="receipt-head">
+                        <h3 id="receipt-title">MYTIX PREMIUM</h3>
+                        <p>Official Sales Receipt</p>
+                    </div>
+
+                    <div class="receipt-meta">
+                        <div class="receipt-meta-line">
+                            <span>No. Transaksi</span>
+                            <strong>${transactionId}</strong>
+                        </div>
+                        <div class="receipt-meta-line">
+                            <span>Tanggal</span>
+                            <strong>${createdAt}</strong>
+                        </div>
+                        <div class="receipt-meta-line">
+                            <span>Metode</span>
+                            <strong>${paymentMethodLabel}</strong>
+                        </div>
+                    </div>
+
+                    <table class="receipt-table">
+                        <thead>
+                            <tr>
+                                <th>Item</th>
+                                <th>Subtotal</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            ${receiptItems}
+                        </tbody>
+                    </table>
+
+                    <div class="receipt-summary">
+                        <div class="receipt-summary-line total">
+                            <span>Total</span>
+                            <strong>${formatIDR(total)}</strong>
+                        </div>
+                        <div class="receipt-summary-line">
+                            <span>Bayar</span>
+                            <strong>${formatIDR(cashReceived)}</strong>
+                        </div>
+                        <div class="receipt-summary-line change">
+                            <span>Kembalian</span>
+                            <strong>${formatIDR(changeAmount)}</strong>
+                        </div>
+                    </div>
+
+                    <p class="receipt-footer">Terima kasih. Simpan struk ini sebagai bukti transaksi.</p>
+                </div>
+            `;
+
+            document.getElementById('receipt-content').innerHTML = receiptHTML;
+        }
+
+        function closeReceipt() {
+            receiptModal.classList.remove('active');
+            receiptModal.setAttribute('aria-hidden', 'true');
+        }
+
+        function startNewTransaction() {
+            closeReceipt();
+            clearCash();
+            cart = [];
+            grandTotal = 0;
+            lastCompletedTransaction = null;
+            updatePrintButtonState();
+            updateCart();
+        }
+
+        function formatIDR(value) {
+            return `Rp ${Number(value).toLocaleString('id-ID')}`;
+        }
+
+        function formatNumberID(value) {
+            return Number(value).toLocaleString('id-ID');
+        }
+
+        function buildTransactionId(dateValue) {
+            const year = dateValue.getFullYear();
+            const month = String(dateValue.getMonth() + 1).padStart(2, '0');
+            const date = String(dateValue.getDate()).padStart(2, '0');
+            const hours = String(dateValue.getHours()).padStart(2, '0');
+            const minutes = String(dateValue.getMinutes()).padStart(2, '0');
+            const seconds = String(dateValue.getSeconds()).padStart(2, '0');
+            return `TRX-${year}${month}${date}-${hours}${minutes}${seconds}`;
+        }
+
+        function escapeHtml(value) {
+            return String(value)
+                .replace(/&/g, '&amp;')
+                .replace(/</g, '&lt;')
+                .replace(/>/g, '&gt;')
+                .replace(/"/g, '&quot;')
+                .replace(/'/g, '&#39;');
+        }
+
+        function vibrate() {
+            if ('vibrate' in navigator) {
+                navigator.vibrate(40);
+            }
+        }
+
+        function iconMapPin() {
+            return '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 21s7-4.4 7-10a7 7 0 1 0-14 0c0 5.6 7 10 7 10z"></path><circle cx="12" cy="11" r="2.5"></circle></svg>';
+        }
+
+        function iconBus() {
+            return '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="4" y="4" width="16" height="12" rx="2"></rect><path d="M7 16v2"></path><path d="M17 16v2"></path><circle cx="8" cy="18" r="1"></circle><circle cx="16" cy="18" r="1"></circle></svg>';
+        }
+
+        function iconGrid() {
+            return '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="4" y="4" width="6" height="6" rx="1"></rect><rect x="14" y="4" width="6" height="6" rx="1"></rect><rect x="4" y="14" width="6" height="6" rx="1"></rect><rect x="14" y="14" width="6" height="6" rx="1"></rect></svg>';
+        }
+
+        window.onload = init;
+    </script>
+</body>
+</html>
